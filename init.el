@@ -24,7 +24,9 @@
     elpy
     ein
     flycheck
-    py-autopep8))
+    py-autopep8
+    ;; go addons
+    go-mode))
 
 (mapc #'(lambda (package)
     (unless (package-installed-p package)
@@ -88,6 +90,14 @@
 ;; enable autopep8 formatting on save
 (require 'py-autopep8)
 (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+
+;; GOLANG CONFIGURATION
+;; -------------------------------------- 
+(add-hook 'go-mode-hook
+	  (lambda ()
+	    (add-hook 'before-save-hook 'gofmt-before-save)
+            (setq tab-width 4)
+            (setq indent-tabs-mode nil)))
 
 ;; init.el ends here
 
