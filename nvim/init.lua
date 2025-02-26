@@ -1,16 +1,14 @@
 -- init.lua following the garcia5's pattern:
 -- https://github.com/garcia5/dotfiles/blob/master/files/nvim/init.lua
 
--- Essentials
-vim.g.mapleader = " "
-vim.g.bulitin_lsp = true
-vim.opt.termguicolors = true
-
 -- Disable providers for faster startup
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_node_provider = 0
+
+require "ven/options"
+require "ven/keymaps"
 
 -- Cache lua modules (https://github.com/neovim/neovim/pull/22668)
 vim.loader.enable()
@@ -33,6 +31,3 @@ require("lazy").setup("ven.plugins", {
       notify = false,
   },
 })
-
-require "ven/options"
-require "ven/keymaps"

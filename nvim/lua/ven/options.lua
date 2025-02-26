@@ -1,3 +1,6 @@
+-- Essentials
+vim.g.bulitin_lsp = true
+
 local options = {
   backup = false,                          -- creates a backup file
   breakindent = true,                      -- Enable break indent

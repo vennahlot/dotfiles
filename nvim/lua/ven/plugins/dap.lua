@@ -28,8 +28,8 @@ return {
           dapui.close()
         end
 
-        vim.fn.sign_define('DapBreakpoint',{ text ='🔴' })
-        vim.fn.sign_define('DapStopped',{ text ='➡️' })
+        vim.fn.sign_define('DapBreakpoint',{ text = '' })
+        vim.fn.sign_define('DapStopped',{ text = '󰜴'})
 
         vim.keymap.set('n', '<F5>', require 'dap'.continue)
         vim.keymap.set('n', '<F8>', require 'dap'.terminate)
