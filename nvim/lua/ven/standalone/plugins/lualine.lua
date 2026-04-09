@@ -1,9 +1,6 @@
 -- lualine.nvim is a plugin that provides a statusline for Neovim. This plugin is used in the statusline configuration.
 return {
     "nvim-lualine/lualine.nvim",
-    dependencies = {
-        "AndreM222/copilot-lualine", -- Show copilot status on Lualine.
-    },
     config = function()
         local lualine = require("lualine")
 
@@ -63,7 +60,7 @@ return {
             lualine_a = {"mode"},
             lualine_b = {filename, filetype},
             lualine_c = {"encoding", "branch", diff},
-            lualine_x = {"copilot", diagnostics},
+            lualine_x = {diagnostics},
             lualine_y = {},
             lualine_z = {"progress", "location"}
           },

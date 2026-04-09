@@ -2,15 +2,14 @@
 return {
     "hrsh7th/nvim-cmp",
     dependencies = {
-        "hrsh7th/cmp-nvim-lsp", -- Completion source LSP
-        "zbirenbaum/copilot-cmp",  -- Completion source for Copilot
-        "onsails/lspkind.nvim", -- Icons for LSP
+        "hrsh7th/cmp-nvim-lsp",  -- Completion source LSP
+        "hrsh7th/cmp-buffer",    -- Completion source: open buffers
+        "hrsh7th/cmp-path",      -- Completion source: file paths
+        "onsails/lspkind.nvim",  -- Icons for LSP
     },
     config = function()
         local cmp = require("cmp")
         local lspkind = require("lspkind")
-
-        require("copilot_cmp").setup()
 
         cmp.setup({
             mapping = cmp.mapping.preset.insert {
@@ -42,15 +41,16 @@ return {
                     maxwidth = 50,
                     ellipsis_char = '...',
                     show_labelDetails = true,
-                    symbol_map = { Copilot = "" },
+                    symbol_map = {},
                 }),
                 expandable_indicator = false,
                 fields = { 'abbr', 'kind', 'menu' },
             },
             sources = {
-                { name = "lazydev", group_index = 1 },
-                { name = "copilot", group_index = 2 },
+                { name = "lazydev",  group_index = 1 },
                 { name = "nvim_lsp", group_index = 2 },
+                { name = "buffer",   group_index = 3 },
+                { name = "path",     group_index = 3 },
             },
         })
     end,
