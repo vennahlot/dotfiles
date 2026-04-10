@@ -2,6 +2,14 @@
 return {
     "akinsho/toggleterm.nvim",
     config = function()
+        local Terminal = require("toggleterm.terminal").Terminal
+
+        local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+        local claude = Terminal:new({ cmd = "claude", hidden = true, direction = "float" })
+
+        vim.keymap.set("n", "<leader>gg", function() lazygit:toggle() end, { noremap = true, silent = true, desc = "Toggle lazygit" })
+        vim.keymap.set({ "n", "t" }, "<C-,>", function() claude:toggle() end, { noremap = true, silent = true, desc = "Toggle claude" })
+
         require("toggleterm").setup({
           size = 15,
           open_mapping = [[<c-\>]],
