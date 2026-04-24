@@ -1,0 +1,401 @@
+#!/usr/bin/env python3
+"""Render a Markdown file to PDF with a clean, printable style.
+
+Supports GitHub-flavored tables, fenced code with syntax highlighting
+(Pygments), Mermaid diagrams, and task lists.
+
+Dependencies:
+    pip install markdown pygments playwright
+    python -m playwright install chromium
+
+Usage:
+    md2pdf INPUT.md                 # writes INPUT.pdf next to the source
+    md2pdf INPUT.md -o OUTPUT.pdf   # write to a specific path
+    md2pdf INPUT.md --title "..."   # override the PDF document title
+"""
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+import markdown
+from playwright.sync_api import sync_playwright
+from pygments.formatters import HtmlFormatter
+
+PYGMENTS_CSS = HtmlFormatter(style="monokai").get_style_defs(".codehilite")
+
+CSS = """
+@page {
+    size: A4;
+    margin: 20mm 18mm 24mm 18mm;
+}
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+:root {
+    --c-brand: #2563eb;
+    --c-brand-light: #eff6ff;
+    --c-text: #1e293b;
+    --c-muted: #64748b;
+    --c-border: #e2e8f0;
+    --c-bg-code: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.72;
+    color: var(--c-text);
+}
+
+/* Headings */
+
+h1 {
+    font-size: 28pt;
+    font-weight: 800;
+    color: var(--c-brand);
+    margin: 0 0 5mm 0;
+    padding-bottom: 4mm;
+    border-bottom: 3px solid var(--c-brand);
+    letter-spacing: -0.6px;
+    line-height: 1.15;
+}
+
+h2 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: var(--c-text);
+    margin: 12mm 0 4mm 0;
+    padding-bottom: 2mm;
+    border-bottom: 1.5px solid var(--c-border);
+    page-break-after: avoid;
+}
+
+h3 {
+    font-size: 12pt;
+    font-weight: 600;
+    color: var(--c-text);
+    margin: 8mm 0 2.5mm 0;
+    page-break-after: avoid;
+}
+
+h4 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--c-muted);
+    margin: 5mm 0 2mm 0;
+}
+
+/* Body text */
+
+p { margin: 0 0 3mm 0; orphans: 3; widows: 3; }
+
+a { color: var(--c-brand); text-decoration: none; }
+
+strong { font-weight: 600; }
+
+hr {
+    border: none;
+    border-top: 1.5px solid var(--c-border);
+    margin: 8mm 0;
+}
+
+/* Blockquote */
+
+blockquote {
+    margin: 0 0 5mm 0;
+    padding: 3.5mm 5mm;
+    background: var(--c-brand-light);
+    border-left: 4px solid var(--c-brand);
+    border-radius: 0 6px 6px 0;
+    color: var(--c-muted);
+    font-size: 9.5pt;
+}
+blockquote p { margin: 0; }
+
+/* Tables */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 3mm 0 5mm 0;
+    font-size: 9.5pt;
+    page-break-inside: auto;
+}
+
+thead { background: #f1f5f9; }
+
+th {
+    text-align: left;
+    font-weight: 600;
+    padding: 2.5mm 3mm;
+    border: 1px solid var(--c-border);
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--c-muted);
+}
+
+td {
+    padding: 2.5mm 3mm;
+    border: 1px solid var(--c-border);
+    vertical-align: top;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+/* Inline code */
+
+code {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+    font-size: 9pt;
+    background: #f1f5f9;
+    padding: 0.8mm 2mm;
+    border-radius: 3px;
+    color: #0f172a;
+}
+
+/* Code blocks */
+
+pre {
+    background: var(--c-bg-code);
+    color: #e2e8f0;
+    padding: 4mm 5mm;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 3mm 0 5mm 0;
+    page-break-inside: avoid;
+    line-height: 1.5;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: 8.5pt;
+}
+
+.codehilite {
+    background: var(--c-bg-code);
+    color: #e2e8f0;
+    padding: 4mm 5mm;
+    border-radius: 8px;
+    margin: 3mm 0 5mm 0;
+    page-break-inside: avoid;
+}
+.codehilite pre {
+    background: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+}
+
+/* Lists */
+
+ul, ol {
+    margin: 2mm 0 4mm 0;
+    padding-left: 6mm;
+}
+
+li { margin-bottom: 1.5mm; }
+li > ul, li > ol { margin: 1mm 0; }
+
+li.task-item {
+    list-style: none;
+    margin-left: -6mm;
+}
+
+li.task-item input[type="checkbox"] {
+    margin-right: 2mm;
+    accent-color: var(--c-brand);
+    vertical-align: middle;
+}
+
+/* Mermaid diagrams */
+
+pre.mermaid {
+    background: white;
+    color: var(--c-text);
+    text-align: center;
+    padding: 5mm 3mm;
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    page-break-inside: avoid;
+}
+"""
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{title}</title>
+  <style>{pygments_css}</style>
+  <style>{css}</style>
+</head>
+<body>
+  {body}
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({{ startOnLoad: true, theme: 'base', themeVariables: {{
+      primaryColor: '#eff6ff', primaryBorderColor: '#2563eb',
+      primaryTextColor: '#1e293b', lineColor: '#64748b',
+      secondaryColor: '#f1f5f9', tertiaryColor: '#f8fafc',
+      fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, Arial, sans-serif',
+      fontSize: '13px'
+    }} }});
+  </script>
+</body>
+</html>"""
+
+
+_MERMAID_FENCE = re.compile(r"```mermaid\s*\n(.*?)```", re.DOTALL)
+_MERMAID_PLACEHOLDER = "MERMAID_BLOCK_{}"
+
+
+def _extract_mermaid_blocks(md_text: str) -> tuple[str, list[str]]:
+    """Pull mermaid fences out before markdown parsing so codehilite ignores them."""
+    blocks: list[str] = []
+
+    def _replace(m: re.Match) -> str:
+        blocks.append(m.group(1).strip())
+        return _MERMAID_PLACEHOLDER.format(len(blocks) - 1)
+
+    cleaned = _MERMAID_FENCE.sub(_replace, md_text)
+    return cleaned, blocks
+
+
+def _restore_mermaid_blocks(html: str, blocks: list[str]) -> str:
+    for i, diagram in enumerate(blocks):
+        placeholder = f"<p>{_MERMAID_PLACEHOLDER.format(i)}</p>"
+        html = html.replace(
+            placeholder,
+            f'<pre class="mermaid">\n{diagram}\n</pre>',
+        )
+    return html
+
+
+def _convert_task_lists(html: str) -> str:
+    """Turn GitHub-style task list markers into real checkboxes."""
+    html = re.sub(
+        r"<li>\s*\[ \]\s*",
+        '<li class="task-item"><input type="checkbox" disabled> ',
+        html,
+    )
+    html = re.sub(
+        r"<li>\s*\[x\]\s*",
+        '<li class="task-item"><input type="checkbox" checked disabled> ',
+        html,
+        flags=re.IGNORECASE,
+    )
+    return html
+
+
+def render(input_md: Path, output_pdf: Path, title: str) -> None:
+    md_text = input_md.read_text(encoding="utf-8")
+    md_text, mermaid_blocks = _extract_mermaid_blocks(md_text)
+
+    extensions = ["tables", "fenced_code", "codehilite", "toc", "smarty"]
+    extension_configs = {
+        "codehilite": {
+            "css_class": "codehilite",
+            "guess_lang": True,
+            "noclasses": False,
+        },
+        "toc": {"permalink": False},
+    }
+
+    html_body = markdown.markdown(
+        md_text, extensions=extensions, extension_configs=extension_configs
+    )
+    html_body = _restore_mermaid_blocks(html_body, mermaid_blocks)
+    html_body = _convert_task_lists(html_body)
+
+    full_html = HTML_TEMPLATE.format(
+        title=title,
+        css=CSS,
+        pygments_css=PYGMENTS_CSS,
+        body=html_body,
+    )
+
+    print(f"Rendering {input_md.name} → {output_pdf.name} ...")
+    has_mermaid = len(mermaid_blocks) > 0
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
+        page.set_content(full_html, wait_until="networkidle")
+
+        if has_mermaid:
+            page.wait_for_function(
+                "() => !document.querySelector('.mermaid[data-processed=\"false\"]')"
+                " && document.querySelectorAll('.mermaid svg').length > 0",
+                timeout=15_000,
+            )
+        page.pdf(
+            path=str(output_pdf),
+            format="A4",
+            margin={"top": "20mm", "right": "18mm", "bottom": "24mm", "left": "18mm"},
+            print_background=True,
+            display_header_footer=True,
+            header_template="<span></span>",
+            footer_template=(
+                '<div style="width:100%;text-align:center;font-size:9px;'
+                "color:#94a3b8;font-family:-apple-system,sans-serif\">"
+                '<span class="pageNumber"></span>'
+                " / "
+                '<span class="totalPages"></span>'
+                "</div>"
+            ),
+        )
+        browser.close()
+
+    size_kb = output_pdf.stat().st_size / 1024
+    print(f"Done — {output_pdf}  ({size_kb:.0f} KB)")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Render a Markdown file to a styled PDF.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("input", type=Path, help="Path to the input .md file")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=None,
+        help="Output PDF path (default: replace .md with .pdf next to the source)",
+    )
+    parser.add_argument(
+        "--title",
+        type=str,
+        default=None,
+        help="PDF document title (default: input filename without extension)",
+    )
+    args = parser.parse_args()
+
+    input_md: Path = args.input.expanduser().resolve()
+    if not input_md.is_file():
+        print(f"error: input file not found: {input_md}", file=sys.stderr)
+        return 1
+
+    output_pdf: Path = (
+        args.output.expanduser().resolve()
+        if args.output is not None
+        else input_md.with_suffix(".pdf")
+    )
+    output_pdf.parent.mkdir(parents=True, exist_ok=True)
+
+    title = args.title if args.title is not None else input_md.stem
+
+    render(input_md, output_pdf, title)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
