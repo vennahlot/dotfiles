@@ -40,8 +40,8 @@ local lsp = {
             nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
             -- Diagnostic keymaps
-            nmap('[d', vim.diagnostic.goto_prev, "Goto previous diagnostic")
-            nmap(']d', vim.diagnostic.goto_next, "Goto next diagnostic")
+            nmap('[d', function() vim.diagnostic.jump({ count = -1 }) end, "Goto previous diagnostic")
+            nmap(']d', function() vim.diagnostic.jump({ count = 1 }) end, "Goto next diagnostic")
 
             -- See `:help K` for why this keymap
             nmap('K', vim.lsp.buf.hover, 'Hover Documentation')

@@ -6,12 +6,20 @@ return {
         "nvim-treesitter/nvim-treesitter-textobjects", -- Additional textobjects.
     },
     config = function()
-        require("nvim-treesitter").setup({
-          ensure_installed = {
+        require("nvim-treesitter").setup()
+
+        -- Install parsers for common languages
+        require("nvim-treesitter").install({
             "lua", "vim", "vimdoc", "bash", "json", "python", "java", "yaml",
             "markdown", "markdown_inline"
-          },
-          auto_install = true,
+        })
+
+        -- Enable treesitter features via FileType autocommand
+        vim.api.nvim_create_autocmd("FileType", {
+            callback = function()
+                local ok = pcall(vim.treesitter.start)
+                if not ok then return end
+            end,
         })
     end,
 }
