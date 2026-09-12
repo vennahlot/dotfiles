@@ -15,6 +15,7 @@ return {
             { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "in [H]elp" },
             { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "[R]ecent files" },
             { "<leader>fw", "<cmd>Telescope grep_string<cr>", desc = "by grep on current [W]ord" },
+            { "<leader>m", group = "[M]arkdown" },
         })
     end,
 }
