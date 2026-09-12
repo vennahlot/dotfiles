@@ -1,6 +1,8 @@
--- gruvbox.nvim is a plugin that provides a color scheme for Neovim. This plugin is used in the colorscheme configuration.
+-- Colorscheme. Loaded eagerly and early so no UI plugin paints before it.
 return {
     "ellisonleao/gruvbox.nvim",
+    lazy = false,
+    priority = 1000,
     config = function()
         require("gruvbox").setup({
             terminal_colors = true, -- add neovim terminal colors

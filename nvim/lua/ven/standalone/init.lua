@@ -9,6 +9,7 @@ vim.g.loaded_node_provider = 0
 
 require "ven.standalone.options"
 require "ven.standalone.keymaps"
+require "ven.standalone.autocmds"
 
 -- Cache lua modules (https://github.com/neovim/neovim/pull/22668)
 vim.loader.enable()
@@ -29,5 +30,19 @@ require("lazy").setup("ven.standalone.plugins", {
       -- automatically check for config file changes and reload the ui
       enabled = true,
       notify = false,
+  },
+  ui = { border = "rounded" },
+  performance = {
+    rtp = {
+      -- Built-in plugins that nothing here uses
+      disabled_plugins = {
+        "gzip",
+        "netrwPlugin",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
   },
 })

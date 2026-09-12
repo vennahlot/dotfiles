@@ -1,11 +1,14 @@
 -- Keymapping
 return {
     "folke/which-key.nvim",
+    event = "VeryLazy",
     config = function()
         local wk = require("which-key")
         wk.add({
             mode = { "n", "v" },
             { "<leader><leader>", "<cmd>Telescope buffers<cr>", desc = "find buffers" },
+            { "<leader>c", group = "[C]ode" },
+            { "<leader>d", group = "[D]ocument" },
             { "<leader>f", group = "[F]ind" },
             { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "[B]uffers" },
             { "<leader>fc", "<cmd>Telescope current_buffer_fuzzy_find<cr>", desc = "[C]urrent buffer" },
@@ -15,7 +18,9 @@ return {
             { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "in [H]elp" },
             { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "[R]ecent files" },
             { "<leader>fw", "<cmd>Telescope grep_string<cr>", desc = "by grep on current [W]ord" },
+            { "<leader>g", group = "[G]it" },
             { "<leader>m", group = "[M]arkdown" },
+            { "<leader>w", group = "[W]orkspace" },
         })
     end,
 }

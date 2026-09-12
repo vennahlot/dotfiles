@@ -1,6 +1,8 @@
 -- DAP configurations.
 return {
     "mfussenegger/nvim-dap",
+    keys = { "<F5>", "<F8>", "<F10>", "<F11>", "<F12>", "<leader>b" },
+    cmd = { "DapContinue", "DapToggleBreakpoint", "DapNew" },
     dependencies = {
         "jay-babu/mason-nvim-dap.nvim", -- Mason dap connections
         -- Debugger UI
@@ -11,7 +13,7 @@ return {
         -- Display virtual text for variable values
         {
             "theHamsta/nvim-dap-virtual-text",
-            dependencies = { "nvim-treesitter/nvim-treesitter" }
+            dependencies = { "nvim-treesitter/nvim-treesitter" },
         },
     },
     config = function()
@@ -31,12 +33,12 @@ return {
         vim.fn.sign_define('DapBreakpoint',{ text = '' })
         vim.fn.sign_define('DapStopped',{ text = '󰜴'})
 
-        vim.keymap.set('n', '<F5>', require 'dap'.continue)
-        vim.keymap.set('n', '<F8>', require 'dap'.terminate)
-        vim.keymap.set('n', '<F10>', require 'dap'.step_over)
-        vim.keymap.set('n', '<F11>', require 'dap'.step_into)
-        vim.keymap.set('n', '<F12>', require 'dap'.step_out)
-        vim.keymap.set('n', '<leader>b', require 'dap'.toggle_breakpoint, { desc = 'Toggle [B]reakpoint' })
+        vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
+        vim.keymap.set('n', '<F8>', dap.terminate, { desc = 'Debug: Terminate' })
+        vim.keymap.set('n', '<F10>', dap.step_over, { desc = 'Debug: Step Over' })
+        vim.keymap.set('n', '<F11>', dap.step_into, { desc = 'Debug: Step Into' })
+        vim.keymap.set('n', '<F12>', dap.step_out, { desc = 'Debug: Step Out' })
+        vim.keymap.set('n', '<leader>b', dap.toggle_breakpoint, { desc = 'Toggle [B]reakpoint' })
 
         require("nvim-dap-virtual-text").setup({})
 

@@ -1,30 +1,23 @@
-local opts = { noremap = true, silent = true }
-
--- Shorten function name
-local keymap = vim.api.nvim_set_keymap
-
---Remap space as leader key
-keymap("", "<Space>", "<Nop>", opts)  -- Applies to normal, visual, and operator-pending modes
+-- Remap space as leader key
+vim.keymap.set("", "<Space>", "<Nop>", { silent = true })
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- Modes
---   normal_mode = "n",
---   insert_mode = "i",
---   visual_mode = "v",
---   visual_block_mode = "x",
---   term_mode = "t",
---   command_mode = "c",
+local map = function(mode, lhs, rhs, desc)
+  vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, desc = desc })
+end
 
--- Normal --
 -- Better window navigation
-keymap("n", "<C-h>", "<C-w>h", opts)
-keymap("n", "<C-j>", "<C-w>j", opts)
-keymap("n", "<C-k>", "<C-w>k", opts)
-keymap("n", "<C-l>", "<C-w>l", opts)
+map("n", "<C-h>", "<C-w>h", "Go to left window")
+map("n", "<C-j>", "<C-w>j", "Go to lower window")
+map("n", "<C-k>", "<C-w>k", "Go to upper window")
+map("n", "<C-l>", "<C-w>l", "Go to right window")
 
 -- Resize with arrows
-keymap("n", "<C-Up>", ":resize +2<CR>", opts)
-keymap("n", "<C-Down>", ":resize -2<CR>", opts)
-keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
-keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
+map("n", "<C-Up>", "<cmd>resize +2<cr>", "Increase window height")
+map("n", "<C-Down>", "<cmd>resize -2<cr>", "Decrease window height")
+map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", "Decrease window width")
+map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", "Increase window width")
+
+-- Clear search highlight
+map("n", "<Esc>", "<cmd>nohlsearch<cr>", "Clear search highlight")
