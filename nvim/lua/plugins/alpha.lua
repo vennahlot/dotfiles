@@ -1,27 +1,27 @@
--- alpha.lua is a plugin that displays a start screen when opening Neovim.
+-- Start screen: recent files, quick links, and a reminder of built-in habits.
 return {
   "goolord/alpha-nvim",
   event = "VimEnter",
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-  },
+  dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local theta = require("alpha.themes.theta")
 
-    -- A small reminder of built-in buffer habits, shown on every start.
-    -- Trim lines as they become muscle memory.
+    -- Built-ins worth keeping in muscle memory. Trim lines as they stick.
     local habits = {
       type = "group",
       val = {
-        { type = "text", val = "Buffer habits", opts = { hl = "SpecialComment", position = "center" } },
+        { type = "text", val = "Habits", opts = { hl = "SpecialComment", position = "center" } },
         { type = "padding", val = 1 },
         {
           type = "text",
           val = {
             "<C-^>          alternate buffer",
             "<C-o> / <C-i>  jumplist back / forward",
-            ":b part<Tab>   jump by partial name",
+            ":b part<Tab>   jump by partial buffer name",
             "mQ .. 'Q       global marks = pinned files",
+            "zM / zR / za   fold to structure / open all / toggle",
+            "gd gO grr      definition / symbols / references",
+            ":grep  ]q [q   ripgrep into quickfix, walk it",
             "SPC SPC        buffers (MRU), <C-x> deletes",
             "SPC b d/o/a    delete / close others / close all",
           },

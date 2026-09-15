@@ -54,6 +54,11 @@ return {
       end,
     })
 
+    -- stylua is installed through Mason and runs as a language server too, so
+    -- vim.lsp.buf.format on Lua uses it. Disable lua_ls's own formatter so the
+    -- two do not both run with different styles.
+    vim.lsp.config("lua_ls", { settings = { Lua = { format = { enable = false } } } })
+
     require("mason-lspconfig").setup({
       ensure_installed = SERVERS,
       automatic_enable = { exclude = { "jdtls" } },
