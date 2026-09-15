@@ -26,36 +26,21 @@ return {
       },
     })
 
-    -- Buffer-local keymaps, set once per attached client.
+    -- Neovim 0.11+ already maps these when a server attaches:
+    --   grn rename        gra code action     grr references    gri implementation
+    --   grt type def      gO document symbols K hover           [d ]d <C-w>d diagnostics
+    --   <C-s> signature help (insert)   <C-]> definition (tagfunc)   gq format (formatexpr)
+    -- Only what is missing, or upgraded to a Telescope picker, is mapped here.
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("ven_lsp_attach", { clear = true }),
       callback = function(event)
-        local nmap = function(keys, func, desc)
+        local builtin = require("telescope.builtin")
+        local map = function(keys, func, desc)
           vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
-
-        nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[N]ame")
-        nmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
-
-        nmap("gd", vim.lsp.buf.definition, "[G]oto [D]efinition")
-        nmap("gi", vim.lsp.buf.implementation, "[G]oto [I]mplementation")
-        nmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-        nmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
-        nmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
-
-        -- Diagnostic keymaps
-        nmap("[d", function()
-          vim.diagnostic.jump({ count = -1 })
-        end, "Goto previous diagnostic")
-        nmap("]d", function()
-          vim.diagnostic.jump({ count = 1 })
-        end, "Goto next diagnostic")
-        nmap("<leader>e", vim.diagnostic.open_float, "Show diagnostic [E]rror")
-
-        -- See `:help K` for why this keymap
-        nmap("K", vim.lsp.buf.hover, "Hover Documentation")
-        -- NOTE: signature help is <C-s> in insert mode (a Neovim 0.11+ default).
-        -- It is deliberately NOT mapped to <C-k> here, which is window navigation.
+        map("gd", vim.lsp.buf.definition, "Goto definition")
+        map("grr", builtin.lsp_references, "References")
+        map("gO", builtin.lsp_document_symbols, "Document symbols")
       end,
     })
 

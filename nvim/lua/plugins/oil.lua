@@ -12,7 +12,6 @@ return {
       desc = "Open parent directory",
     },
     {
-      "<leader>-",
       function()
         require("oil").toggle_float()
       end,
