@@ -11,23 +11,12 @@ return {
       end,
       desc = "Open parent directory",
     },
-    {
-      function()
-        require("oil").toggle_float()
-      end,
-      desc = "Open parent directory (float)",
-    },
   },
   opts = {
     default_file_explorer = true,
     delete_to_trash = true,
     skip_confirm_for_simple_edits = true,
-    view_options = {
-      show_hidden = true,
-    },
-    float = { border = "rounded" },
-    keymaps = {
-      ["q"] = { "actions.close", mode = "n" },
-    },
+    view_options = { show_hidden = true },
+    keymaps = { ["q"] = { "actions.close", mode = "n" } },
   },
 }

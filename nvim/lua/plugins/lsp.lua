@@ -1,19 +1,18 @@
--- Servers installed by Mason and enabled automatically by mason-lspconfig.
+-- LSP: servers installed by Mason and enabled by mason-lspconfig.
 -- jdtls is installed here but started by nvim-jdtls (see plugins/jdtls.lua),
 -- so it is excluded from automatic_enable to avoid two clients per buffer.
 local SERVERS = { "lua_ls", "pyright", "jdtls" }
 
--- LSP configs.
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
   dependencies = {
-    "mason-org/mason-lspconfig.nvim", -- Mason LSP integration.
+    { "mason-org/mason.nvim", cmd = "Mason", opts = { ui = { border = "rounded" } } },
+    "mason-org/mason-lspconfig.nvim",
   },
   config = function()
-    -- Diagnostic display (global config, set once)
     vim.diagnostic.config({
-      virtual_text = false,
+      virtual_text = false, -- the gutter sign is enough while reading; <C-w>d shows the message
       severity_sort = true,
       float = { border = "rounded", source = true },
       signs = {
@@ -34,18 +33,27 @@ return {
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("ven_lsp_attach", { clear = true }),
       callback = function(event)
-        local builtin = require("telescope.builtin")
-        local map = function(keys, func, desc)
-          vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+        -- Native completion, auto-triggered while typing.
+        -- <C-n>/<C-p> move, <C-y> accepts, <C-e> dismisses; docs show in a popup.
+        if client and client:supports_method("textDocument/completion") then
+          vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
         end
-        map("gd", vim.lsp.buf.definition, "Goto definition")
-        map("grr", builtin.lsp_references, "References")
-        map("gO", builtin.lsp_document_symbols, "Document symbols")
+
+        local builtin = require("telescope.builtin")
+        local map = function(mode, keys, func, desc)
+          vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
+        end
+        map("n", "gd", vim.lsp.buf.definition, "Goto definition")
+        map("n", "grr", builtin.lsp_references, "References")
+        map("n", "gO", builtin.lsp_document_symbols, "Document symbols")
+        map({ "n", "v" }, "<leader>cf", function()
+          vim.lsp.buf.format({ async = true })
+        end, "Format")
       end,
     })
 
-    -- Completion capabilities are contributed by blink.cmp, which registers
-    -- them on vim.lsp.config("*") itself on Neovim 0.11+.
     require("mason-lspconfig").setup({
       ensure_installed = SERVERS,
       automatic_enable = { exclude = { "jdtls" } },

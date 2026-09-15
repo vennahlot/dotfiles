@@ -4,8 +4,7 @@ if not ok then
   return
 end
 
-local mason = vim.fn.stdpath("data") .. "/mason/packages"
-local launcher = mason .. "/jdtls/bin/jdtls"
+local launcher = vim.fn.stdpath("data") .. "/mason/packages/jdtls/bin/jdtls"
 if vim.fn.executable(launcher) == 0 then
   vim.notify("jdtls is not installed — run :MasonInstall jdtls", vim.log.levels.WARN)
   return
@@ -22,27 +21,10 @@ jdtls.start_or_attach({
   settings = {
     java = {
       signatureHelp = { enabled = true },
-      contentProvider = { preferred = "fernflower" }, -- decompile class files
-      completion = {
-        favoriteStaticMembers = {
-          "org.junit.Assert.*",
-          "org.junit.jupiter.api.Assertions.*",
-          "org.mockito.Mockito.*",
-        },
-      },
-      sources = {
-        organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 },
-      },
+      contentProvider = { preferred = "fernflower" }, -- decompile .class files when jumping into a library
+      sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } },
     },
   },
 })
 
-vim.keymap.set("n", "<leader>co", jdtls.organize_imports, { buffer = 0, desc = "[C]ode [O]rganize imports" })
-vim.keymap.set("n", "<leader>cv", jdtls.extract_variable, { buffer = 0, desc = "[C]ode extract [V]ariable" })
-vim.keymap.set("n", "<leader>cm", jdtls.extract_method, { buffer = 0, desc = "[C]ode extract [M]ethod" })
-vim.keymap.set("v", "<leader>cv", function()
-  jdtls.extract_variable(true)
-end, { buffer = 0, desc = "[C]ode extract [V]ariable" })
-vim.keymap.set("v", "<leader>cm", function()
-  jdtls.extract_method(true)
-end, { buffer = 0, desc = "[C]ode extract [M]ethod" })
+vim.keymap.set("n", "<leader>co", jdtls.organize_imports, { buffer = 0, desc = "Organize imports" })

@@ -38,3 +38,10 @@ end, "Delete buffer (force)")
 map("n", "<leader>bo", util.bufremove_others, "Close other buffers")
 -- Classic idiom: wipe all buffers, reopen the current one, drop the blank one.
 map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", "Close all, reopen current")
+
+-- Git -------------------------------------------------------------------------
+-- Hunk navigation, preview and blame keys are in plugins/gitsigns.lua.
+-- Inside the float, <C-\><C-n> leaves terminal mode; quitting lazygit closes it.
+map("n", "<leader>gg", function()
+  util.float_term("lazygit")
+end, "Lazygit")
