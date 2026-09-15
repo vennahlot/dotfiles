@@ -1,7 +1,8 @@
-if vim.g.vscode then
-  -- VSCode Neovim
-  require "ven.vscode.init"
-else
-  -- Standalone Neovim
-  require "ven.standalone.init"
-end
+-- Leader must be set before any plugin creates a mapping.
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+require("config.options")
+require("config.keymaps")
+require("config.autocmds")
+require("config.lazy")

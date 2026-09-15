@@ -1,7 +1,5 @@
--- Remap space as leader key
+-- Leader is <Space> (set in init.lua); stop it from also moving the cursor.
 vim.keymap.set("", "<Space>", "<Nop>", { silent = true })
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
 
 local map = function(mode, lhs, rhs, desc)
   vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, desc = desc })
@@ -74,8 +72,12 @@ local function bufremove_others()
   vim.notify(("Closed %d other buffer(s)"):format(n))
 end
 
-map("n", "<leader>bd", function() bufremove(false) end, "[D]elete buffer (keep window)")
-map("n", "<leader>bD", function() bufremove(true) end, "[D]elete buffer (force)")
+map("n", "<leader>bd", function()
+  bufremove(false)
+end, "[D]elete buffer (keep window)")
+map("n", "<leader>bD", function()
+  bufremove(true)
+end, "[D]elete buffer (force)")
 map("n", "<leader>bo", bufremove_others, "Close [O]ther buffers")
 -- Classic idiom: wipe all buffers, reopen the current one, drop the blank one.
 map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", "Close [A]ll, reopen current")
