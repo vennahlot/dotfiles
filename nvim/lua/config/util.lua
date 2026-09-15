@@ -40,12 +40,15 @@ function M.bufremove_others()
   vim.notify(("Closed %d other buffer(s)"):format(n))
 end
 
--- Toggle a floating terminal running `cmd`. One terminal per command: the
--- buffer survives being hidden, and the window closes when the command exits.
+-- Toggle a floating terminal running `cmd` (a string or argv list). One
+-- terminal per command: the buffer survives being hidden, and the window
+-- closes when the command exits. Passing `key` also binds it inside that
+-- terminal's buffer so the same key hides the float from terminal mode.
 local terms = {}
-function M.float_term(cmd)
-  local t = terms[cmd] or {}
-  terms[cmd] = t
+function M.float_term(cmd, key)
+  local id = type(cmd) == "table" and table.concat(cmd, " ") or cmd
+  local t = terms[id] or {}
+  terms[id] = t
   if t.win and vim.api.nvim_win_is_valid(t.win) then
     vim.api.nvim_win_hide(t.win)
     t.win = nil
@@ -78,6 +81,11 @@ function M.float_term(cmd)
         end)
       end,
     })
+    if key then
+      vim.keymap.set("t", key, function()
+        M.float_term(cmd, key)
+      end, { buffer = t.buf, silent = true, desc = "Hide terminal" })
+    end
   end
   vim.cmd.startinsert()
 end
