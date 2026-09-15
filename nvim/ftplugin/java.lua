@@ -16,14 +16,9 @@ local root = vim.fs.root(0, { "gradlew", "mvnw", "pom.xml", "build.gradle", "bui
     or vim.fn.getcwd()
 local workspace = vim.fn.stdpath("cache") .. "/jdtls/" .. vim.fn.fnamemodify(root, ":p:h:t")
 
--- Debugger and test runner bundles, if the Mason packages are present.
-local bundles = vim.fn.glob(mason .. "/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar", true, true)
-vim.list_extend(bundles, vim.fn.glob(mason .. "/java-test/extension/server/*.jar", true, true))
-
 jdtls.start_or_attach({
     cmd = { launcher, "-data", workspace },
     root_dir = root,
-    init_options = { bundles = bundles },
     settings = {
         java = {
             signatureHelp = { enabled = true },

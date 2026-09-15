@@ -9,8 +9,7 @@ return {
     },
     {
         -- Keeps the non-LSP tools installed. LSP servers are handled by
-        -- mason-lspconfig (plugins/lsp.lua) and debug adapters by
-        -- mason-nvim-dap (plugins/dap.lua).
+        -- mason-lspconfig (plugins/lsp.lua).
         "WhoIsSethDaniel/mason-tool-installer.nvim",
         event = "VeryLazy",
         dependencies = { "mason-org/mason.nvim" },
@@ -21,7 +20,6 @@ return {
                 "google-java-format",  -- java formatter
                 "shfmt",               -- shell formatter
                 "prettier",            -- json / yaml / markdown formatter
-                "java-test",           -- jdtls test bundles (java-debug-adapter comes from mason-nvim-dap)
             },
             run_on_start = true,
             auto_update = false,
