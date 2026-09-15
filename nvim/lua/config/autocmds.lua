@@ -22,3 +22,15 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.formatoptions:remove({ "c", "r", "o" })
   end,
 })
+
+-- [[ Reload files changed outside Neovim ]]
+-- Coding agents edit files while they are open here. Pick the change up as
+-- soon as focus returns instead of waiting for a manual :checktime.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "TermClose", "TermLeave" }, {
+  group = augroup("checktime"),
+  callback = function()
+    if vim.o.buftype ~= "nofile" and vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
