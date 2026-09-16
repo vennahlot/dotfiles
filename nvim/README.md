@@ -76,8 +76,8 @@ plugin. `which-key.lua` defines group names only.
 | Lua dev | lazydev.nvim | Neovim API types for editing this config |
 
 Completion is Neovim's native LSP completion with autotrigger (`<C-n>`
-`<C-p>` `<C-y>`). Formatting is `vim.lsp.buf.format` on demand. Lazygit and a
-shell run in native floating terminals from `config/util.lua`.
+`<C-p>` `<C-y>`). Formatting is `vim.lsp.buf.format` on demand. Lazygit runs
+in a native floating terminal from `config/util.lua`.
 
 ## Keymaps worth knowing
 
@@ -99,7 +99,6 @@ Leader is `<Space>`. Press it and wait for which-key.
 | `]h` / `[h` / `<leader>gp` | Next / previous hunk / preview hunk |
 | `<leader>gb` / `gB` / `gd` | Toggle line blame / full blame / diff this file |
 | `<leader>gg` | Lazygit in a float |
-| `<C-\>` | Toggle a shell float (same key hides it from inside) |
 | `<leader>mr` / `mp` | Toggle markdown rendering / browser preview |
 | `]m` `[m` `]]` `[[` | Next / previous function, next / previous class |
 | `<C-h/j/k/l>` | Move between windows |
@@ -114,7 +113,7 @@ Leader is `<Space>`. Press it and wait for which-key.
 | `mQ` ... `'Q` | Uppercase marks are global and persist: a pinned file set |
 | `zM` / `zR` / `za` | Fold a file to its structure / open all / toggle one |
 | `:grep foo` then `]q` `[q` | Ripgrep into the quickfix list, walk the results |
-| `<C-\><C-n>` | Leave terminal mode (every terminal but the `<C-\>` shell float) |
+| `<C-\><C-n>` | Leave terminal mode inside the lazygit float |
 
 These are also listed on the start screen. Trim lines there as they become
 muscle memory.

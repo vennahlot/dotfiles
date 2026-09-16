@@ -45,12 +45,3 @@ map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", "Close all, reopen current")
 map("n", "<leader>gg", function()
   util.float_term("lazygit")
 end, "Lazygit")
-
--- Terminal --------------------------------------------------------------------
--- A shell float on the key toggleterm used to own. The same key hides it from
--- inside, so within this one buffer <C-\><C-n> is shadowed (timeoutlen is 0, so
--- there is no window to type the second key). Every other terminal -- the
--- lazygit float above, plain :terminal -- keeps <C-\><C-n> for normal mode.
-map("n", "<C-\\>", function()
-  util.float_term({ vim.o.shell }, "<C-\\>")
-end, "Toggle terminal")
